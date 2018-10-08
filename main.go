@@ -59,7 +59,7 @@ func main() {
 				if len(command.ArgsStr) == 0 {
 					continue
 				}
-
+				sendText(command.Message.Chat.CID, command.ArgsStr)
 			case "rbq:who":
 				if ok, master := isMyMaster(command.Message.From.UID); ok {
 					sendText(command.Message.Chat.CID, fmt.Sprintf(
