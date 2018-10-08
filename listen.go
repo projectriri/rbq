@@ -11,14 +11,17 @@ type ListeningChat struct {
 	Regexp       *regexp.Regexp
 }
 
-var listeningChatMap = make(map[string]ListeningChat)
+var listeningChatMap = make(map[string]map[string]ListeningChat)
 
 func listen(cid ubm_api.CID, goshujinsama ubm_api.CID, pattern string) {
 	if pattern == "" {
 		pattern = `[\s\S]*`
 	}
 	reg := regexp.MustCompile(pattern)
-	listeningChatMap[cid.String()+goshujinsama.String()] = ListeningChat{
+	if lc, ok := listeningChatMap[cid.String()]; !ok || lc == nil {
+		listeningChatMap[cid.String()] = make(map[string]ListeningChat)
+	}
+	listeningChatMap[cid.String()][goshujinsama.String()] = ListeningChat{
 		Goshujinsama: goshujinsama,
 		Regexp:       reg,
 	}
@@ -29,7 +32,16 @@ func listen(cid ubm_api.CID, goshujinsama ubm_api.CID, pattern string) {
 }
 
 func stopListen(cid ubm_api.CID, goshujinsama ubm_api.CID) {
-	delete(listeningChatMap, cid.String()+goshujinsama.String())
+	if lc, ok := listeningChatMap[cid.String()]; !ok {
+		return
+	} else if lc == nil {
+		delete(listeningChatMap, cid.String())
+	} else {
+		delete(lc, goshujinsama.String())
+		if len(lc) == 0 {
+			delete(listeningChatMap, cid.String())
+		}
+	}
 	sendText(
 		goshujinsama,
 		"索然无味！",
@@ -40,8 +52,8 @@ func onListen(message *ubm_api.Message) {
 	if message.Type != "rich_text" || message.RichText == nil {
 		return
 	}
-	lc, ok := listeningChatMap[message.Chat.CID.String()]
-	if !ok {
+	lc2, ok := listeningChatMap[message.Chat.CID.String()]
+	if !ok || lc2 == nil || len(lc2) == 0 {
 		return
 	}
 	text := ""
@@ -50,19 +62,21 @@ func onListen(message *ubm_api.Message) {
 			text += elem.Text
 		}
 	}
-	if lc.Regexp.MatchString(text) {
-		msg := append(ubm_api.RichText{
-			{
-				Type: "text",
-				Text: fmt.Sprintf("Chat: %v, From: %v \n", message.Chat, message.From),
-			},
-		}, *message.RichText...)
-		sendMessage(
-			lc.Goshujinsama,
-			ubm_api.Message{
-				Type:     "rich_text",
-				RichText: &msg,
-			},
-		)
+	msg := append(ubm_api.RichText{
+		{
+			Type: "text",
+			Text: fmt.Sprintf("Chat: %v, From: %v \n", message.Chat, message.From),
+		},
+	}, *message.RichText...)
+	for _, lc := range lc2 {
+		if lc.Regexp.MatchString(text) {
+			sendMessage(
+				lc.Goshujinsama,
+				ubm_api.Message{
+					Type:     "rich_text",
+					RichText: &msg,
+				},
+			)
+		}
 	}
 }

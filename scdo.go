@@ -31,8 +31,7 @@ func addScdoer(cid ubm_api.CID, uid ubm_api.UID, args []string) {
 	case "scdoer":
 		plus1s()
 		sendText(cid, "我是绒布球哦！")
-		fallthrough
-	case "master":
+	default:
 		d := plus1s()
 		go func() {
 			for {
@@ -48,11 +47,11 @@ func addScdoer(cid ubm_api.CID, uid ubm_api.UID, args []string) {
 }
 
 func checkScdoPrivilege(cid ubm_api.CID, uid ubm_api.UID) string {
-	if ok, _ := isMyMaster(uid); ok {
-		return "master"
-	}
 	if _, ok := scdoers[cid.String()]; ok {
 		return "scdoer"
+	}
+	if ok, _ := isMyMaster(uid); ok {
+		return "master"
 	}
 	return ""
 }
@@ -95,11 +94,11 @@ func scdo(cmd cmd.Command) {
 		Packet: types.Packet{
 			Head: types.Head{
 				UUID: utils.GenerateUUID(),
-				From:  cmd.Message.Chat.CID.Messenger,
+				From: cmd.Message.Chat.CID.Messenger,
 				Format: types.Format{
-					API: "ubm-api",
+					API:     "ubm-api",
 					Version: "1.0",
-					Method: "receive",
+					Method:  "receive",
 				},
 			},
 			Body: b,

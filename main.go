@@ -1,14 +1,14 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/projectriri/bot-gateway/adapters/jsonrpc-server-any/client/golang"
 	"github.com/projectriri/bot-gateway/router"
 	"github.com/projectriri/bot-gateway/types"
-	"github.com/projectriri/bot-gateway/types/ubm-api"
 	"github.com/projectriri/bot-gateway/types/cmd"
-	"encoding/json"
-	"fmt"
+	"github.com/projectriri/bot-gateway/types/ubm-api"
 )
 
 var C jsonrpc_sdk.Client
@@ -32,16 +32,14 @@ func main() {
 			To:   ".*",
 			Formats: []types.Format{
 				{
-					API:      "cmd",
-					Version:  "1.0",
-					Protocol: "",
-					Method:   "cmd",
+					API:     "cmd",
+					Version: "1.0",
+					Method:  "cmd",
 				},
 				{
-					API:      "ubm-api",
-					Version:  "1.0",
-					Protocol: "",
-					Method:   "receive",
+					API:     "ubm-api",
+					Version: "1.0",
+					Method:  "receive",
 				},
 			},
 		},
