@@ -14,7 +14,12 @@ import (
 var scdoers = make(map[string]time.Time)
 
 func addScdoer(cid ubm_api.CID, uid ubm_api.UID, args []string) {
-	plus1s := func() time.Duration {
+	switch checkScdoPrivilege(cid, uid) {
+	case "":
+		sendText(cid, "汝不是咱的主人！")
+	case "scdoer":
+		sendText(cid, "我是绒布球哦！")
+	default:
 		duration := 15 * time.Minute
 		if len(args) > 0 {
 			d, err := time.ParseDuration(args[0])
@@ -23,19 +28,9 @@ func addScdoer(cid ubm_api.CID, uid ubm_api.UID, args []string) {
 			}
 		}
 		scdoers[cid.String()] = time.Now().Add(duration)
-		return duration
-	}
-	switch checkScdoPrivilege(cid, uid) {
-	case "":
-		sendText(cid, "汝不是咱的主人！")
-	case "scdoer":
-		plus1s()
-		sendText(cid, "我是绒布球哦！")
-	default:
-		d := plus1s()
 		go func() {
 			for {
-				<-time.After(d)
+				<-time.After(duration)
 				if time.Now().After(scdoers[cid.String()]) {
 					delete(scdoers, cid.String())
 					return

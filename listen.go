@@ -13,7 +13,12 @@ type ListeningChat struct {
 
 var listeningChatMap = make(map[string]map[string]ListeningChat)
 
-func listen(cid ubm_api.CID, goshujinsama ubm_api.CID, pattern string) {
+func listen(cid ubm_api.CID, from *ubm_api.User, pattern string) {
+	if ok, _ := isMyMaster(from.UID); !ok {
+		sendText(cid, "只有主人才可以跟咱做那种事情哦～！")
+		return
+	}
+	goshujinsama  := from.PrivateChat
 	if pattern == "" {
 		pattern = `[\s\S]*`
 	}

@@ -67,7 +67,7 @@ func main() {
 					sendText(command.Message.Chat.CID, "汝好像不是咱的主人呐！")
 				}
 			case "rbq:listen":
-				listen(command.Message.Chat.CID, command.Message.From.PrivateChat, command.ArgsStr)
+				listen(command.Message.Chat.CID, command.Message.From, command.ArgsStr)
 			case "rbq:leave":
 				stopListen(command.Message.Chat.CID, command.Message.From.PrivateChat)
 			case "rbq:scdo":
