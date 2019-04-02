@@ -35,6 +35,7 @@ func main() {
 					API:     "cmd",
 					Version: "1.0",
 					Method:  "cmd",
+					Protocol: `{"command_prefix":["!!rbq::"],"response_mode":26}`,
 				},
 				{
 					API:     "ubm-api",
@@ -53,12 +54,12 @@ func main() {
 			var command cmd.Command
 			json.Unmarshal(pkt.Body, &command)
 			switch command.CmdStr {
-			case "rbq:say":
+			case "say":
 				if len(command.ArgsStr) == 0 {
 					continue
 				}
 				sendText(command.Message.Chat.CID, command.ArgsStr)
-			case "rbq:who":
+			case "who":
 				if ok, master := isMyMaster(command.Message.From.UID); ok {
 					sendText(command.Message.Chat.CID, fmt.Sprintf(
 						"%s 是咱的主人呐！", master,
@@ -66,20 +67,16 @@ func main() {
 				} else {
 					sendText(command.Message.Chat.CID, "汝好像不是咱的主人呐！")
 				}
-			case "rbq:listen":
+			case "listen":
 				listen(command.Message.Chat.CID, command.Message.From, command.ArgsStr)
-			case "rbq:leave":
+			case "leave":
 				stopListen(command.Message.Chat.CID, command.Message.From.PrivateChat)
-			case "rbq:scdo":
+			case "scdo":
 				scdo(command)
-			case "rbq:ntr":
+			case "ntr":
 				addScdoer(command.Message.Chat.CID, command.Message.From.UID, command.ArgsTxt)
-			case "rbq:use":
+			case "use":
 				heyMaster()
-				sendText(command.Message.Chat.CID, "啊啊啊不要、不要、啊……才没有感到好舒服")
-			case "ping":
-				fallthrough
-			case "rbq:ping":
 				sendText(command.Message.Chat.CID, "主人想要做什么？QvQ")
 			}
 		case "ubm-api":
